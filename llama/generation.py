@@ -23,17 +23,28 @@ Role = Literal["system", "user", "assistant"]
 
 
 class Message(TypedDict):
+    """
+    A TypedDict representing a message in a dialogue. It contains the role of the sender and the content of the message.
+    """
     role: Role
     content: str
 
 
 class CompletionPrediction(TypedDict, total=False):
+    """
+    A TypedDict representing a text completion prediction. It contains the generated text, and optionally the tokens
+    and log probabilities of the tokens.
+    """
     generation: str
     tokens: List[str]  # not required
     logprobs: List[float]  # not required
 
 
 class ChatPrediction(TypedDict, total=False):
+    """
+    A TypedDict representing a chat prediction. It contains the generated message, and optionally the tokens and log
+    probabilities of the tokens.
+    """
     generation: Message
     tokens: List[str]  # not required
     logprobs: List[float]  # not required
@@ -49,6 +60,10 @@ UNSAFE_ERROR = "Error: special tags are not allowed as part of the prompt."
 
 
 class Llama:
+    """
+    The main class for the Llama 2 language model. It provides methods for building the model, generating text, and
+    performing text completion and chat completion tasks.
+    """
     @staticmethod
     def build(
         ckpt_dir: str,
@@ -57,6 +72,10 @@ class Llama:
         max_batch_size: int,
         model_parallel_size: Optional[int] = None,
     ) -> "Llama":
+        """
+        A static method that builds a Llama model. It initializes the model parallel and loads the model weights from
+        the checkpoint directory. It also initializes the tokenizer.
+        """
         if not torch.distributed.is_initialized():
             torch.distributed.init_process_group("nccl")
         if not model_parallel_is_initialized():
@@ -99,6 +118,9 @@ class Llama:
         return Llama(model, tokenizer)
 
     def __init__(self, model: Transformer, tokenizer: Tokenizer):
+        """
+        Initializes a Llama instance with a Transformer model and a tokenizer.
+        """
         self.model = model
         self.tokenizer = tokenizer
 
@@ -112,6 +134,10 @@ class Llama:
         logprobs: bool = False,
         echo: bool = False,
     ) -> Tuple[List[List[int]], Optional[List[List[float]]]]:
+        """
+        Generates text given a list of prompt tokens. It also supports controlling the generation process with
+        temperature and top_p parameters, and can return log probabilities of the generated tokens.
+        """
         params = self.model.params
         bsz = len(prompt_tokens)
         assert bsz <= params.max_batch_size, (bsz, params.max_batch_size)
@@ -187,6 +213,10 @@ class Llama:
         logprobs: bool = False,
         echo: bool = False,
     ) -> List[CompletionPrediction]:
+        """
+        Performs text completion tasks given a list of prompts. It generates text that completes the prompts and returns
+        a list of CompletionPrediction instances.
+        """
         if max_gen_len is None:
             max_gen_len = self.model.params.max_seq_len - 1
         prompt_tokens = [self.tokenizer.encode(x, bos=True, eos=False) for x in prompts]
@@ -217,6 +247,10 @@ class Llama:
         max_gen_len: Optional[int] = None,
         logprobs: bool = False,
     ) -> List[ChatPrediction]:
+        """
+        Performs chat completion tasks given a list of dialogs. It generates responses to the dialogs and returns a
+        list of ChatPrediction instances.
+        """
         if max_gen_len is None:
             max_gen_len = self.model.params.max_seq_len - 1
         prompt_tokens = []
@@ -300,6 +334,19 @@ class Llama:
 
 
 def sample_top_p(probs, p):
+    """
+    This function performs top-p sampling from the provided probabilities.
+    
+    Args:
+        probs (torch.Tensor): The probabilities from which to sample. The tensor should have the same
+            shape as the output of the model's forward method.
+        p (float): The cumulative probability threshold. Only tokens with a cumulative probability less
+            than this value will be considered in the sampling process.
+    
+    Returns:
+        next_token (torch.Tensor): The sampled token indices. The tensor has the same shape as the input
+            probabilities tensor, but with the last dimension reduced to 1.
+    """
     probs_sort, probs_idx = torch.sort(probs, dim=-1, descending=True)
     probs_sum = torch.cumsum(probs_sort, dim=-1)
     mask = probs_sum - probs_sort > p

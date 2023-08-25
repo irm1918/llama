@@ -1,0 +1,12 @@
+info about repository:
+This repository contains the code and model weights for Llama 2, a family of large language models developed by Meta. Llama 2 includes pretrained and fine-tuned generative text models with parameter sizes ranging from 7 billion to 70 billion. The fine-tuned models, called Llama-2-Chat, are optimized for dialogue use cases and have shown competitive performance compared to popular closed-source models. 
+
+To download the model weights and tokenizer, users need to visit the Meta AI website and accept the license. Once approved, a signed URL will be provided to initiate the download. The repository provides instructions on how to run the download script.
+
+After downloading the models, users can set up the environment by cloning the repository and installing the required dependencies. The repository provides examples for running inference using both the pretrained models and the fine-tuned chat models. Different models require different model-parallel (MP) values, and users need to set the `max_seq_len` and `max_batch_size` values according to their hardware.
+
+The repository also provides information on reporting issues and bugs related to the models, as well as guidelines for responsible use. It includes a code of conduct that outlines the expected behavior of contributors and maintainers, as well as the enforcement policies for unacceptable behavior.
+
+The repository contains a detailed model card that provides information about the model developers, variations, input and output formats, model architecture, training data, evaluation results, and ethical considerations. It also includes information about the hardware and software used for training, as well as the carbon footprint of the training process.
+
+Overall, this repository serves as a resource for accessing and using the Llama 2 language models, providing both pretrained and fine-tuned models for various natural language generation tasks. It emphasizes responsible use and provides guidelines for ensuring the safety and ethical use of the models.

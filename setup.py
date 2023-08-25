@@ -5,6 +5,15 @@ from setuptools import find_packages, setup
 
 
 def get_requirements(path: str):
+    """
+    This function reads a file and returns a list of its lines, each stripped of leading/trailing whitespace.
+    
+    Args:
+        path (str): The path to the file to be read.
+    
+    Returns:
+        list: A list of strings, each representing a line in the file, stripped of leading/trailing whitespace.
+    """
     return [l.strip() for l in open(path)]
 
 
